@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<!-- saved from url=(0130)https://admin.google.com/ServiceNotAllowed?application=865579354872&source=scrip&continue=https://chromewebstore.google.com/&pli=1 -->
+<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat et Snake avec Inscription</title>
+    <style>
+        /* Style général */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #00ace6;
+        }
+
+        /* Formulaire d'inscription */
+        #registration-form {
+            display: flex;
+            flex-direction: column;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 172, 230, 0.5);
+        }
+
+        #registration-form input {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            width: 100%;
+        }
+
+        #registration-form button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #00ace6;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Conteneur de chat */
+        #chat-container {
+            display: none;
+            width: 90%;
+            max-width: 400px;
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 172, 230, 0.5);
+            margin-bottom: 20px;
+        }
+
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            background-color: #222;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ace6;
+        }
+
+        .message {
+            padding: 5px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        .my-message {
+            background-color: #00ace6;
+            color: #fff;
+        }
+
+        #input-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        #send-button {
+            background-color: #00ace6;
+            color: #fff;
+        }
+
+        /* Section du jeu Snake */
+        #snake-container {
+            display: none;
+            width: 90%;
+            max-width: 400px;
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 172, 230, 0.5);
+        }
+
+        #game {
+            background-color: #000;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            border: 2px solid #00ace6;
+        }
+
+        #play-game-button {
+            display: none;
+            background-color: #00ace6;
+            color: white;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat et Jeux avec Inscription</h1>
+
+    <!-- Formulaire d'inscription -->
+    <div id="registration-form">
+        <input type="text" id="username" placeholder="Pseudo" required="">
+        <input type="email" id="email" placeholder="E-mail" required="">
+        <button onclick="register()">S'inscrire</button>
+    </div>
+
+    <!-- Conteneur de Chat -->
+    <div id="chat-container">
+        <div id="messages"></div>
+        <div id="input-container">
+            <input type="text" id="message-input" placeholder="Écrivez votre message...">
+            <button id="send-button" onclick="sendMessage()">Envoyer</button>
+        </div>
+    </div>
+
+    <!-- Bouton pour lancer le jeu Snake -->
+    <button id="play-game-button" onclick="showGame()">Jeux</button>
+
+    <!-- Conteneur du Jeu Snake -->
+    <div id="snake-container">
+        <div id="game"></div>
+        <p>Utilisez les flèches pour contrôler le Snake</p>
+    </div>
+
+    <script>
+        // Fonction pour gérer l'inscription
+        function register() {
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+
+            if (username && email) {
+                document.getElementById("registration-form").style.display = "none";
+                document.getElementById("chat-container").style.display = "block";
+                document.getElementById("play-game-button").style.display = "block";
+                alert(`Bienvenue ${username} ! Vous pouvez maintenant utiliser le chat et accéder au jeu.`);
+            } else {
+                alert("Veuillez remplir tous les champs.");
+            }
+        }
+
+        // Fonctionnalité du Chat
+        function sendMessage() {
+            const messageInput = document.getElementById("message-input");
+            const message = messageInput.value;
+            if (message.trim() !== "") {
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message", "my-message");
+                messageElement.textContent = message;
+                document.getElementById("messages").appendChild(messageElement);
+                messageInput.value = "";
+                document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+            }
+        }
+
+        // Afficher le conteneur du jeu
+        function showGame() {
+            document.getElementById("snake-container").style.display = "block";
+            document.getElementById("play-game-button").disabled = true; // Désactiver le bouton après clic
+            initSnakeGame();
+        }
+
+        // Initialiser le jeu Snake
+        function initSnakeGame() {
+            const gameCanvas = document.getElementById("game");
+            const ctx = gameCanvas.getContext("2d");
+
+            const boxSize = 20;
+            let snake = [{ x: 9 * boxSize, y: 9 * boxSize }];
+            let food = {
+                x: Math.floor(Math.random() * 15 + 1) * boxSize,
+                y: Math.floor(Math.random() * 15 + 1) * boxSize
+            };
+            let direction = "RIGHT";
+            let score = 0;
+
+            document.addEventListener("keydown", event => {
+                if (event.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+                else if (event.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+                else if (event.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+                else if (event.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+            });
+
+            function draw() {
+                ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+
+                snake.forEach((part, index) => {
+                    ctx.fillStyle = index === 0 ? "#00ace6" : "white";
+                    ctx.fillRect(part.x, part.y, boxSize, boxSize);
+                    ctx.strokeStyle = "#000";
+                    ctx.strokeRect(part.x, part.y, boxSize, boxSize);
+                });
+
+                ctx.fillStyle = "#FF6347";
+                ctx.fillRect(food.x, food.y, boxSize, boxSize);
+
+                let snakeX = snake[0].x;
+                let snakeY = snake[0].y;
+
+                if (direction === "UP") snakeY -= boxSize;
+                if (direction === "DOWN") snakeY += boxSize;
+                if (direction === "LEFT") snakeX -= boxSize;
+                if (direction === "RIGHT") snakeX += boxSize;
+
+                if (snakeX === food.x && snakeY === food.y) {
+                    score++;
+                    food = {
+                        x: Math.floor(Math.random() * 15 + 1) * boxSize,
+                        y: Math.floor(Math.random() * 15 + 1) * boxSize
+                    };
+                } else {
+                    snake.pop();
+                }
+
+                let newHead = { x: snakeX, y: snakeY };
+
+                if (snakeX < 0 || snakeY < 0 || snakeX >= gameCanvas.width || snakeY >= gameCanvas.height || collision(newHead, snake)) {
+                    clearInterval(game);
+                    alert(`Game Over! Score: ${score}`);
+                }
+
+                snake.unshift(newHead);
+            }
+
+            function collision(head, array) {
+                return array.some(part => part.x === head.x && part.y === head.y);
+            }
+
+            let game = setInterval(draw, 100);
+        }
+    </script>
+
+
+</body></html>
